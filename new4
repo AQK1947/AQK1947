@@ -35,15 +35,14 @@ def compare_csv(file1_path, file2_path, output_path):
                 cell.fill = highlight_fill
 
     # Save the Excel workbook as a CSV file
-    with open(output_path + '.csv', 'w', newline='') as output_file:
-        csv_writer = csv.writer(output_file)
-        csv_writer.writerow(output_worksheet[1])
-        for row in output_worksheet.iter_rows(min_row=2):
-            csv_writer.writerow([cell.value for cell in row])
+    output_workbook.save(output_path + '.xlsx')
+
+    # Save the DataFrame as a CSV file without the index column
+    df.to_csv(output_path + '.csv', index=False)
 
 file1_path = 'file1.csv'
 file2_path = 'file2.csv'
 output_path = 'comparison_results'
 
 compare_csv(file1_path, file2_path, output_path)
-print(f"Comparison results saved to {output_path}.csv")
+print(f"Comparison results saved to {output_path}.xlsx and {output_path}.csv")
