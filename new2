@@ -1,0 +1,25 @@
+import csv
+
+def compare_csv(file1_path, file2_path, output_path):
+    differences = []
+
+    with open(file1_path, 'r') as file1, open(file2_path, 'r') as file2:
+        csv_reader1 = csv.reader(file1)
+        csv_reader2 = csv.reader(file2)
+
+        for row_num, (row1, row2) in enumerate(zip(csv_reader1, csv_reader2), start=1):
+            if row1 != row2:
+                differences.append([f"Row {row_num}", row1, row2])
+
+    # Save the comparison results to a new CSV file
+    with open(output_path, 'w', newline='') as output_file:
+        csv_writer = csv.writer(output_file)
+        csv_writer.writerow(['Row Number', 'File 1 Data', 'File 2 Data'])
+        csv_writer.writerows(differences)
+
+file1_path = 'file1.csv'
+file2_path = 'file2.csv'
+output_path = 'comparison_results.csv'
+
+compare_csv(file1_path, file2_path, output_path)
+print(f"Comparison results saved to {output_path}")
