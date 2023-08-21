@@ -24,26 +24,32 @@ def compare_sheets(sheet1, sheet2):
     return differences
 
 def main():
-    directory = '/path/to/excel/files'
+    directory1 = '/path/to/excel/workbook1'
+    directory2 = '/path/to/excel/workbook2'
     result_workbook = openpyxl.Workbook()
     result_sheet = result_workbook.active
 
-    for filename in os.listdir(directory):
-        if filename.endswith(".xlsx") and filename[0].isdigit():
-            full_path = os.path.join(directory, filename)
-            workbook = openpyxl.load_workbook(filename=full_path, data_only=True)
+    for filename1 in os.listdir(directory1):
+        if filename1.endswith(".xlsx") and filename1[0].isdigit():
+            full_path1 = os.path.join(directory1, filename1)
+            workbook1 = openpyxl.load_workbook(filename=full_path1, data_only=True)
 
-            # Process each sheet in the workbook
-            for sheet_name in workbook.sheetnames:
-                if workbook[sheet_name].max_row > 0:
-                    sheet1 = workbook[sheet_name]
-                    sheet2 = result_sheet
+            for filename2 in os.listdir(directory2):
+                if filename2.endswith(".xlsx") and filename2[0].isdigit():
+                    full_path2 = os.path.join(directory2, filename2)
+                    workbook2 = openpyxl.load_workbook(filename=full_path2, data_only=True)
 
-                    differences = compare_sheets(sheet1, sheet2)
+                    # Process each sheet in both workbooks
+                    for sheet_name in workbook1.sheetnames:
+                        if sheet_name in workbook2.sheetnames:
+                            sheet1 = workbook1[sheet_name]
+                            sheet2 = workbook2[sheet_name]
 
-                    # Write differences to result sheet
-                    for diff_row in differences:
-                        result_sheet.append(diff_row)
+                            differences = compare_sheets(sheet1, sheet2)
+
+                            # Write differences to result sheet
+                            for diff_row in differences:
+                                result_sheet.append(diff_row)
 
     result_workbook.save('comparison_results.xlsx')
 
