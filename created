@@ -5,3 +5,47 @@ workbook = Workbook()
 
 # Save the workbook to a file
 workbook.save('new_workbook.xlsx')
+
+
+import os
+import openpyxl
+
+def compare_sheets(sheet1, sheet2):
+    differences = []
+
+    for row1, row2 in zip(sheet1.iter_rows(), sheet2.iter_rows()):
+        row_diff = []
+        for cell1, cell2 in zip(row1, row2):
+            if cell1.value != cell2.value:
+                row_diff.append(f"Cell 1: {cell1.value}, Cell 2: {cell2.value}")
+        if row_diff:
+            differences.append(row_diff)
+
+    return differences
+
+def main():
+    directory = '/path/to/excel/files'
+    result_workbook = openpyxl.Workbook()
+    result_sheet = result_workbook.active
+
+    for filename in os.listdir(directory):
+        if filename.endswith(".xlsx") and filename[0].isdigit():
+            full_path = os.path.join(directory, filename)
+            workbook = openpyxl.load_workbook(filename=full_path, data_only=True)
+
+            # Process each sheet in the workbook
+            for sheet_name in workbook.sheetnames:
+                if workbook[sheet_name].max_row > 0:
+                    sheet1 = workbook[sheet_name]
+                    sheet2 = result_sheet
+
+                    differences = compare_sheets(sheet1, sheet2)
+
+                    # Write differences to result sheet
+                    for diff_row in differences:
+                        result_sheet.append(diff_row)
+
+    result_workbook.save('comparison_results.xlsx')
+
+if __name__ == "__main__":
+    main()
