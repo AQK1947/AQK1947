@@ -20,3 +20,10 @@ for filename in os.listdir(directory):
         full_path = os.path.join(directory, filename)
         workbook = load_workbook(filename=full_path)
         # Process the workbook 'workbook' here
+
+
+
+    for sheet_name in workbook1.sheet_names:
+    if sheet_name in workbook2.sheet_names:
+        df1 = workbook1.parse(sheet_name)
+        df2 = workbook2.parse(sheet_name)
