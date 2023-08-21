@@ -1,0 +1,7 @@
+from openpyxl import Workbook
+
+# Create a new workbook
+workbook = Workbook()
+
+# Save the workbook to a file
+workbook.save('new_workbook.xlsx')
