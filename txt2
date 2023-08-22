@@ -1,0 +1,20 @@
+import difflib
+
+def compare_and_save(file1_path, file2_path, output_path):
+    with open(file1_path, 'r') as file1, open(file2_path, 'r') as file2:
+        lines1 = file1.readlines()
+        lines2 = file2.readlines()
+
+    # Find differences using difflib's unified_diff function
+    diff_result = difflib.unified_diff(lines1, lines2, lineterm='')
+
+    # Save differences to a new text file
+    with open(output_path, 'w') as output_file:
+        output_file.write('\n'.join(diff_result))
+
+file1_path = 'file1.txt'
+file2_path = 'file2.txt'
+output_path = 'diff_output.txt'
+
+compare_and_save(file1_path, file2_path, output_path)
+print(f"Differences saved to '{output_path}'")
