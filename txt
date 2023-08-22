@@ -1,0 +1,20 @@
+import diff_match_patch
+
+def compare_text_files(file1_path, file2_path):
+    with open(file1_path, 'r') as file1, open(file2_path, 'r') as file2:
+        text1 = file1.read()
+        text2 = file2.read()
+
+    dmp = diff_match_patch.diff_match_patch()
+    diffs = dmp.diff_main(text1, text2)
+    dmp.diff_cleanupSemantic(diffs)
+    html_diff = dmp.diff_prettyHtml(diffs)
+
+    return html_diff
+
+file1_path = 'file1.txt'
+file2_path = 'file2.txt'
+html_diff = compare_text_files(file1_path, file2_path)
+
+# Print the human-readable differences
+print(html_diff)
