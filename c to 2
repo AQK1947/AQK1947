@@ -1,0 +1,16 @@
+def csv_to_txt(csv_file_path, txt_file_path):
+    with open(csv_file_path, 'r') as csv_file:
+        csv_contents = csv_file.read()
+
+    with open(txt_file_path, 'w') as txt_file:
+        txt_file.write(csv_contents)
+
+csv1_file_path = 'input1.csv'
+txt1_file_path = 'output1.txt'
+csv2_file_path = 'input2.csv'
+txt2_file_path = 'output2.txt'
+
+csv_to_txt(csv1_file_path, txt1_file_path)
+csv_to_txt(csv2_file_path, txt2_file_path)
+
+print(f"CSV files '{csv1_file_path}' and '{csv2_file_path}' converted to TXT files '{txt1_file_path}' and '{txt2_file_path}'")
