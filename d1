@@ -1,0 +1,5 @@
+  # Convert the labels to lists
+  df1.index = list(map(str, df1.index))
+  df2.index = list(map(str, df2.index))
+  df1.columns = list(map(str, df1.columns))
+  df2.columns = list(map(str, df2.columns))
