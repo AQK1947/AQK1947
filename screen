@@ -1,0 +1,206 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.awt.image.ColorModel;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+public class ScreenshotApp {
+    private static JFrame frame;
+    private static BufferedImage screenshot;
+    private static BufferedImage copyImage; // Copy of the screenshot for highlighting
+    private static Point startPoint;
+    private static Point endPoint;
+    private static boolean highlighting = false;
+    private static HighlightShape currentShape = HighlightShape.RECTANGLE;
+    private static final int BORDER_THICKNESS = 3; // Adjust the border thickness as needed
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            createAndShowMainScreen();
+        });
+    }
+
+    private static void createAndShowMainScreen() {
+        frame = new JFrame("Screenshot App");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JButton captureButton = new JButton("Capture Screen");
+        captureButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setVisible(false); // Hide the main window
+                captureScreen();
+            }
+        });
+
+        JComboBox<HighlightShape> shapeComboBox = new JComboBox<>(HighlightShape.values());
+        shapeComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentShape = (HighlightShape) shapeComboBox.getSelectedItem();
+            }
+        });
+
+        JPanel panel = new JPanel();
+        panel.add(captureButton);
+        panel.add(new JLabel("Highlight Shape:"));
+        panel.add(shapeComboBox);
+
+        frame.getContentPane().add(panel, BorderLayout.CENTER);
+        frame.setPreferredSize(new Dimension(700, 500));
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0); // Close the application when the close button is clicked
+            }
+        });
+
+        frame.getContentPane().add(closeButton, BorderLayout.SOUTH);
+
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static void captureScreen() {
+        try {
+            Robot robot = new Robot();
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            screenshot = robot.createScreenCapture(new Rectangle(screenSize));
+            copyImage = deepCopy(screenshot);
+
+            JFrame captureFrame = new JFrame("Capture Screen");
+            captureFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Dispose the capture window
+
+            JLabel label = new JLabel(new ImageIcon(copyImage));
+            captureFrame.add(label);
+
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    startPoint = e.getPoint();
+                    endPoint = startPoint;
+                    highlighting = true;
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    endPoint = e.getPoint();
+                    highlighting = false;
+                    highlightArea(label.getGraphics());
+                }
+            });
+
+            label.addMouseMotionListener(new MouseAdapter() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    endPoint = e.getPoint();
+                    if (highlighting) {
+                        label.repaint();
+                    }
+                }
+            });
+
+            JButton saveButton = new JButton("Save Screenshot");
+            saveButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    saveScreenshot();
+                    captureFrame.dispose();
+                    frame.setVisible(true);
+                }
+            });
+
+            captureFrame.add(saveButton, BorderLayout.SOUTH);
+
+            captureFrame.pack();
+            captureFrame.setLocationRelativeTo(null);
+            captureFrame.setVisible(true);
+        } catch (AWTException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error capturing screenshot: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static void highlightArea(Graphics g) {
+        g.drawImage(copyImage, 0, 0, null);
+        g.setColor(Color.RED);
+
+        int x = Math.min(startPoint.x, endPoint.x);
+        int y = Math.min(startPoint.y, endPoint.y);
+        int width = Math.abs(startPoint.x - endPoint.x);
+        int height = Math.abs(startPoint.y - endPoint.y);
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(BORDER_THICKNESS)); // Set the border thickness
+        switch (currentShape) {
+            case RECTANGLE:
+                g2d.drawRect(x, y, width, height);
+                break;
+            case ELLIPSE:
+                g2d.drawOval(x, y, width, height);
+                break;
+            case LINE:
+                g2d.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                break;
+        }
+    }
+
+    private static void saveScreenshot() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Screenshot");
+        int userSelection = fileChooser.showSaveDialog(frame);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File outputFile = fileChooser.getSelectedFile();
+            try {
+                ImageIO.write(copyImage, "PNG", outputFile);
+                JOptionPane.showMessageDialog(null, "Screenshot saved to: " + outputFile.getAbsolutePath(), "Screenshot Captured", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error saving screenshot: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private static BufferedImage deepCopy(BufferedImage bi) {
+        ColorModel cm = bi.getColorModel();
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        BufferedImage copy = new BufferedImage(cm, cm.createCompatibleWritableRaster(bi.getWidth(), bi.getHeight()), isAlphaPremultiplied, null);
+        Graphics g = copy.createGraphics();
+        g.drawImage(bi, 0, 0, null);
+        g.dispose();
+        return copy;
+    }
+
+    private enum HighlightShape {
+        RECTANGLE("Rectangle"),
+        ELLIPSE("Ellipse"),
+        LINE("Line");
+
+        private final String displayName;
+
+        HighlightShape(String displayName) {
+            this.displayName = displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+}
