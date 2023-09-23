@@ -1,0 +1,56 @@
+import csv
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill
+
+# CSV files to compare
+csv_file1 = "Test Before.csv"
+csv_file2 = "Test After.csv"
+
+# Log file
+log_file = "Log File.txt"
+
+# Output file for compared CSV
+compared_csv_file = "Compared File.csv"
+
+# Pattern red
+fill_pattern_red = PatternFill(patternType="solid", fgColor='FF3333')
+
+# Log file open
+f = open(log_file, "w")
+
+# Function to compare CSV files and create a comparison CSV
+def compare_csv(file1, file2, compared_csv_file, log_file):
+    with open(file1, "r") as csv_file1, open(file2, "r") as csv_file2:
+        reader1 = csv.reader(csv_file1)
+        reader2 = csv.reader(csv_file2)
+
+        data1 = list(reader1)
+        data2 = list(reader2)
+
+        differences = []
+
+        for row_number, (row1, row2) in enumerate(zip(data1, data2), start=1):
+            if row1 != row2:
+                f.write(f"Mismatch found in row {row_number}:\n")
+                f.write(f"Before: {', '.join(row1)}\n")
+                f.write(f"After:  {', '.join(row2)}\n")
+
+                differences.append([*row1, *row2])
+
+        if differences:
+            df = pd.DataFrame(differences)
+            df.style.applymap(lambda x: f'background-color: {fill_pattern_red.fill_type}-{fill_pattern_red.fgColor.rgb}' if x != x else '')
+            df.to_excel(compared_csv_file, index=False, header=False, engine="openpyxl")
+        else:
+            f.write("No differences found.\n")
+
+# Call the CSV comparison function
+compare_csv(csv_file1, csv_file2, compared_csv_file, log_file)
+
+# Close the log file
+f.close()
+
+print("CSV Comparison complete.")
+print(f"Please check {compared_csv_file} for the comparison output with differences highlighted.")
+print("Also, check Log File.txt for logs.")
