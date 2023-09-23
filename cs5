@@ -1,0 +1,44 @@
+import pandas as pd
+
+# CSV files to compare
+csv_file1 = "Test Before.csv"
+csv_file2 = "Test After.csv"
+
+# Log file
+log_file = "Log File.txt"
+
+# Output file for compared CSV
+compared_csv_file = "Compared File.csv"
+
+# Function to compare CSV files and create a comparison CSV with style properties
+def compare_csv_with_style(file1, file2, compared_csv_file, log_file):
+    # Read the input CSV files with pandas
+    df1 = pd.read_csv(file1)
+    df2 = pd.read_csv(file2)
+
+    # Find differences between dataframes and highlight with style properties
+    style = pd.DataFrame('', index=df1.index, columns=df1.columns)
+    mask = df1 != df2
+    style[mask] = 'background-color: red'
+
+    # Create a new dataframe with differences highlighted
+    compared_df = df1.copy()
+    compared_df[:] = ''
+    compared_df[mask] = df1[mask].astype(str) + ' --> ' + df2[mask].astype(str)
+    compared_df = compared_df.style.apply(lambda _: style, axis=None)
+
+    # Save the compared data with style properties to a CSV file
+    with open(compared_csv_file, 'w') as f:
+        compared_df.to_csv(f, index=False, header=True)
+
+    # Log the comparison results
+    with open(log_file, "w") as log:
+        log.write("CSV Comparison complete.\n")
+        log.write(f"Compared CSV saved to {compared_csv_file}\n")
+
+# Call the CSV comparison function
+compare_csv_with_style(csv_file1, csv_file2, compared_csv_file, log_file)
+
+print("CSV Comparison complete.")
+print(f"Please check {compared_csv_file} for the comparison output.")
+print("Also, check Log File.txt for logs.")
