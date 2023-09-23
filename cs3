@@ -1,0 +1,47 @@
+import csv
+import pandas as pd
+
+# CSV files to compare
+csv_file1 = "Test Before.csv"
+csv_file2 = "Test After.csv"
+
+# Log file
+log_file = "Log File.txt"
+
+# Output file for compared CSV
+compared_csv_file = "Compared File.csv"
+
+# Function to compare CSV files and create a comparison CSV
+def compare_csv(file1, file2, compared_csv_file, log_file):
+    with open(file1, "r") as csv_file1, open(file2, "r") as csv_file2:
+        reader1 = csv.reader(csv_file1)
+        reader2 = csv.reader(csv_file2)
+
+        data1 = list(reader1)
+        data2 = list(reader2)
+
+        differences = []
+
+        for row_number, (row1, row2) in enumerate(zip(data1, data2), start=1):
+            if row1 != row2:
+                differences.append([f"Before: {', '.join(row1)}", f"After: {', '.join(row2)}"])
+
+        if differences:
+            df = pd.DataFrame(differences)
+            df.to_csv(compared_csv_file, index=False, header=False)
+        else:
+            with open(compared_csv_file, "w"):
+                pass  # Create an empty CSV if no differences
+
+        with open(log_file, "w") as log:
+            if differences:
+                log.write("Differences found and saved in: " + compared_csv_file + "\n")
+            else:
+                log.write("No differences found.\n")
+
+# Call the CSV comparison function
+compare_csv(csv_file1, csv_file2, compared_csv_file, log_file)
+
+print("CSV Comparison complete.")
+print(f"Please check {compared_csv_file} for the comparison output.")
+print("Also, check Log File.txt for logs.")
