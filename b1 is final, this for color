@@ -1,0 +1,45 @@
+import csv
+from colorama import Fore, Style
+
+def compare_csv(file1, file2):
+    differences = []
+
+    with open(file1, 'r') as csv_file1, open(file2, 'r') as csv_file2:
+        reader1 = csv.reader(csv_file1)
+        reader2 = csv.reader(csv_file2)
+
+        header1 = next(reader1)
+        header2 = next(reader2)
+
+        if header1 != header2:
+            raise ValueError("Header rows in the input CSV files do not match.")
+
+        differences.append(header1)
+
+        for row1, row2 in zip(reader1, reader2):
+            difference_row = []
+            for val1, val2 in zip(row1, row2):
+                if val1 != val2:
+                    difference_row.append(Fore.RED + val1 + " -> " + val2 + Style.RESET_ALL)
+                else:
+                    difference_row.append(val1)
+            differences.append(difference_row)
+
+    return differences
+
+def save_differences(diff, output_file):
+    with open(output_file, 'w', newline='') as out_csv:
+        writer = csv.writer(out_csv)
+        writer.writerows(diff)
+
+if __name__ == "__main__":
+    input_file1 = "path/to/first/input.csv"  # Specify the path of the first input CSV file here
+    input_file2 = "path/to/second/input.csv"  # Specify the path of the second input CSV file here
+
+    try:
+        differences = compare_csv(input_file1, input_file2)
+        output_file = "Differences.csv"
+        save_differences(differences, output_file)
+        print(f"Differences saved in {output_file}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
