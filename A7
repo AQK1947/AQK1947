@@ -1,0 +1,59 @@
+import csv
+import pandas as pd
+
+# CSV files to compare
+csv_file1 = "Test Before.csv"
+csv_file2 = "Test After.csv"
+
+# Log file
+logFile = "Log File.txt"
+
+# Output file for compared CSV
+compared_csv_file = "Compared File.csv"
+
+# Log file open
+f = open(logFile, "w")
+
+# Log file start
+f.write("This is a log file containing all the differences found in the comparison.\n")
+f.write("First CSV File Path : " + csv_file1 + "\n")
+f.write("Second CSV File Path : " + csv_file2 + "\n")
+
+# Function to compare CSV files
+def compare_csv(file1, file2, compared_csv_file, log_file):
+    with open(file1, "r") as csv_file1, open(file2, "r") as csv_file2:
+        reader1 = csv.DictReader(csv_file1)
+        reader2 = csv.DictReader(csv_file2)
+
+        differences = []
+
+        for row_number, (row1, row2) in enumerate(zip(reader1, reader2), start=1):
+            if row1 != row2:
+                differences.append(row_number)
+
+        if differences:
+            df = pd.read_csv(file1)
+            df = df[df.index.isin(differences)]
+            df.to_csv(compared_csv_file, index=False)
+            
+            # Log differences
+            with open(compared_csv_file, "a") as diff_file:
+                diff_file.write("\nDifferences:\n")
+                diff_file.write("Row Number, Field, Before, After\n")
+                for row_number in differences:
+                    row1 = next(csv.DictReader(open(file1, "r")), None)
+                    row2 = next(csv.DictReader(open(file2, "r")), None)
+                    if row1 and row2:
+                        for key in row1.keys():
+                            if row1[key] != row2[key]:
+                                diff_file.write(f"{row_number}, {key}, {row1[key]}, {row2[key]}\n")
+        else:
+            with open(compared_csv_file, "w"):
+                pass  # Create an empty CSV if no differences
+
+# Call the CSV comparison function
+compare_csv(csv_file1, csv_file2, compared_csv_file, logFile)
+
+print("CSV Comparison complete.")
+print(f"Please check {logFile} for the log output.")
+print(f"Please check {compared_csv_file} for the compared CSV file.")
