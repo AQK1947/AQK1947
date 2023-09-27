@@ -1,0 +1,36 @@
+import pandas as pd
+
+# Prompt the user to enter the paths of the two CSV files for comparison
+file1_path = input("Enter the path of the first CSV file: ")
+file2_path = input("Enter the path of the second CSV file: ")
+
+# Read the CSV files into dataframes
+df1 = pd.read_csv(file1_path)
+df2 = pd.read_csv(file2_path)
+
+# Compare the two dataframes and capture the differences
+differences = []
+
+# Iterate through each row and column to find differences
+for index, row1 in df1.iterrows():
+    row2 = df2.iloc[index]
+    if not row1.equals(row2):
+        diff = {
+            "Row Number": index + 1,
+            "Before": row1,
+            "After": row2
+        }
+        differences.append(diff)
+
+# Display the differences to the user
+if differences:
+    print("\nDifferences found between the two CSV files:")
+    for diff in differences:
+        print(f"Row {diff['Row Number']}:")
+        print("Before:")
+        print(diff["Before"])
+        print("After:")
+        print(diff["After"])
+        print()
+else:
+    print("\nNo differences found between the two CSV files.")
