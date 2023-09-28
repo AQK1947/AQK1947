@@ -7,23 +7,30 @@ csv_file2 = "Test After.csv"
 # Log file
 log_file = "Log File.txt"
 
-# Log file open
-f = open(log_file, "w")
+# Function to get the header names from a CSV file
+def get_header(csv_file):
+    with open(csv_file, "r") as file:
+        reader = csv.reader(file)
+        header = next(reader)
+    return header
 
 # Function to compare CSV files
 def compare_csv(file1, file2, log_file):
+    header1 = get_header(file1)
+    header2 = get_header(file2)
+
     with open(file1, "r") as csv_file1, open(file2, "r") as csv_file2:
         reader1 = csv.reader(csv_file1)
         reader2 = csv.reader(csv_file2)
 
         for row_number, (row1, row2) in enumerate(zip(reader1, reader2), start=1):
-            mismatch_indices = [i for i, (value1, value2) in enumerate(zip(row1, row2)) if value1 != value2]
-            if mismatch_indices:
-                f.write(f"Mismatch found in row {row_number}:\n")
-                for index in mismatch_indices:
-                    f.write(f"Column {index + 1}:\n")
-                    f.write(f"Before: {row1[index]}\n")
-                    f.write(f"After: {row2[index]}\n")
+            for column, (value1, value2) in enumerate(zip(row1, row2), start=1):
+                if value1 != value2:
+                    header_name = header1[column - 1]  # Adjust for 0-based index
+                    f.write(f"Mismatch found in row {row_number}:\n")
+                    f.write(f"Header: {header_name}\n")
+                    f.write(f"Before: {value1}\n")
+                    f.write(f"After:  {value2}\n")
 
 # Call the CSV comparison function
 compare_csv(csv_file1, csv_file2, log_file)
