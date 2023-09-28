@@ -1,0 +1,35 @@
+import csv
+
+# CSV files to compare
+csv_file1 = "Test Before.csv"
+csv_file2 = "Test After.csv"
+
+# Log file
+log_file = "Log File.txt"
+
+# Log file open
+f = open(log_file, "w")
+
+# Function to compare CSV files
+def compare_csv(file1, file2, log_file):
+    with open(file1, "r") as csv_file1, open(file2, "r") as csv_file2:
+        reader1 = csv.reader(csv_file1)
+        reader2 = csv.reader(csv_file2)
+
+        for row_number, (row1, row2) in enumerate(zip(reader1, reader2), start=1):
+            mismatch_indices = [i for i, (value1, value2) in enumerate(zip(row1, row2)) if value1 != value2]
+            if mismatch_indices:
+                f.write(f"Mismatch found in row {row_number}:\n")
+                for index in mismatch_indices:
+                    f.write(f"Column {index + 1}:\n")
+                    f.write(f"Before: {row1[index]}\n")
+                    f.write(f"After: {row2[index]}\n")
+
+# Call the CSV comparison function
+compare_csv(csv_file1, csv_file2, log_file)
+
+# Close the log file
+f.close()
+
+print("CSV Comparison complete.")
+print("Please check Log File.txt for logs.")
